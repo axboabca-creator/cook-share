@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="appHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الطبخ المجتمعية - CookShare</title>
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #f8f9fa;
+            --text-color: #333;
+            --bg-color: #f4f7f6;
+            --card-bg: #fff;
+            --font-size: 16px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: var(--font-size);
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .nav-buttons button {
+            background: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 0.5rem 0 1rem 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: inherit;
+        }
+
+        button.btn-main {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: inherit;
+            font-weight: bold;
+        }
+
+        button.btn-main:hover {
+            opacity: 0.9;
+        }
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .recipe-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .recipe-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .recipe-content {
+            padding: 1rem;
+            flex-grow: 1;
+        }
+
+        .ratings span {
+            cursor: pointer;
+            color: #ccc;
+            font-size: 1.5rem;
+        }
+
+        .ratings span.active {
+            color: #f39c12;
+        }
+
+        /* نافذة الإعدادات */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .close-btn {
+            float: left;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .developer-info {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-right: 4px solid var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="appTitle">منصة أطباق المجتمع (CookShare)</h1>
+        <div class="nav-buttons">
+            <button onclick="openSettings()">⚙️ <span id="settingsBtnText">الإعدادات</span></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- شريط البحث -->
+        <div class="card">
+            <input type="text" id="searchInput" placeholder="ابحث عن طبق يعجبك لتقليده..." oninput="filterRecipes()">
+        </div>
+
+        <!-- إضافة طبق جديد -->
+        <div class="card">
+            <h3 id="addFormTitle">أضف طبقك الخاص</h3>
+            <input type="hidden" id="recipeIndex" value="">
+            <input type="text" id="recipeName" placeholder="اسم الطبق (مثال: طمينة تقليدية)">
+            <textarea id="recipeIngredients" placeholder="المقادير (كل مكون في سطر)"></textarea>
+            <textarea id="recipeSteps" placeholder="طريقة التحضير والوصف"></textarea>
+            <label id="imgLabel" style="font-weight: bold; font-size: 0.9rem;">صورة الطبق:</label>
+            <input type="file" id="recipeImage" accept="image/*">
+            <button class="btn-main" id="saveBtn" onclick="saveRecipe()">نشر الطبق</button>
+        </div>
+
+        <!-- قائمة الأطباق -->
+        <h2 id="recipesListTitle">الأطباق المتاحة للمجتمع</h2>
+        <div class="recipe-grid" id="recipesContainer">
+            <!-- سيتم تعبئة الأطباق هنا برمجياً -->
+        </div>
+    </div>
+
+    <!-- نافذة الإعدادات -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeSettings()">&times;</span>
+            <h3 id="settingsTitle">إعدادات التطبيق</h3>
+            
+            <label id="langLabel">اللغة / Language:</label>
+            <select id="langSelect" onchange="changeLanguage()">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+            </select>
+
+            <label id="fontSizeLabel">حجم الخط / Font Size:</label>
+            <select id="fontSizeSelect" onchange="changeFontSize()">
+                <option value="14px">صغير (Small)</option>
+                <option value="16px" selected>عادي (Medium)</option>
+                <option value="18px">كبير (Large)</option>
+            </select>
+
+            <div class="developer-info">
+                <p><strong>المبرمج / Developer:</strong> <span style="color:var(--primary-color)">BOABCA AZEDDIN</span></p>
+                <p><strong>للتواصل / Contact:</strong> <a href="mailto:azeddinazeddin2005@gmail.com">azeddinazeddin2005@gmail.com</a></p>
+                <p><button onclick="shareApp()" class="btn-main" style="width:100%; margin-top:5px;" id="shareBtnText">مشاركة التطبيق مع أصدقائك</button></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // قاعدة البيانات المحلية (تخزن في المتصفح لتحديثها لكل المستخدمين على نفس الجهاز أو رفعها لاحقاً لقاعدة بيانات سحابية)
+        let recipes = JSON.parse(localStorage.getItem('cookshare_recipes')) || [
+            {
+                name: "طمينة جزائرية أصيلة",
+                ingredients: "سميد محمص، زبدة، عسل، قرفة، مقصرات للتزيين",
+                steps: "يُمحّص السميد حتى يصبح ذهبياً، تذوب الزبدة وتخلط مع العسل ثم يضاف السميد تدريجياً وتزين.",
+                image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
+                rating: 5,
+                ratingsCount: 2
+            }
+        ];
+
+        function renderRecipes(filter = '') {
+            const container = document.getElementById('recipesContainer');
+            container.innerHTML = '';
+
+            recipes.forEach((recipe, index) => {
+                if (recipe.name.toLowerCase().includes(filter.toLowerCase()) || recipe.ingredients.toLowerCase().includes(filter.toLowerCase())) {
+                    const card = document.createElement('div');
+                    card.className = 'recipe-card';
+                    card.innerHTML = `
+                        <img src="${recipe.image || 'https://via.placeholder.com/300'}" alt="${recipe.name}">
+                        <div class="recipe-content">
+                            <h3>${recipe.name}</h3>
+                            <p><strong>المقادير:</strong> ${recipe.ingredients}</p>
+                            <p><strong>الوصف:</strong> ${recipe.steps}</p>
+                            <div class="ratings">
+                                المقيمون: ${recipe.ratingsCount || 0} | التقييم: <span class="active">★</span> ${(recipe.rating || 0).toFixed(1)}
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button onclick="rateRecipe(${index}, 5)" style="background:#f39c12; color:white; border:none; padding:3px 8px; border-radius:3px; cursor:pointer;">قيم 5 نجوم</button>
+                                <button onclick="editRecipe(${index})" style="background:#3498db; color:white; border:none; padding:3px 8px; border-radius:3px; cursor:pointer;">تعديل</button>
+                                <button onclick="deleteRecipe(${index})" style="background:#e74c3c; color:white; border:none; padding:3px 8px; border-radius:3px; cursor:pointer;">حذف</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+        }
+
+        function saveRecipe() {
+            const index = document.getElementById('recipeIndex').value;
+            const name = document.getElementById('recipeName').value;
+            const ingredients = document.getElementById('recipeIngredients').value;
+            const steps = document.getElementById('recipeSteps').value;
+            const imageInput = document.getElementById('recipeImage');
+
+            if (!name || !ingredients || !steps) {
+                alert('يرجى ملء جميع الحقول الأساسية!');
+                return;
+            }
+
+            let imageUrl = "https://images.unsplash.com/photo-1498837167922-ddd27525d352"; // صورة افتراضية
+            if (imageInput.files && imageInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    processSave(index, name, ingredients, steps, e.target.result);
+                }
+                reader.readAsDataURL(imageInput.files[0]);
+            } else {
+                processSave(index, name, ingredients, steps, index !== "" ? recipes[index].image : imageUrl);
+            }
+        }
+
+        function processSave(index, name, ingredients, steps, image) {
+            if (index === "") {
+                recipes.push({ name, ingredients, steps, image, rating: 5, ratingsCount: 1 });
+            } else {
+                recipes[index] = { ...recipes[index], name, ingredients, steps, image };
+                document.getElementById('recipeIndex').value = "";
+                document.getElementById('saveBtn').innerText = currentLang === 'ar' ? "نشر الطبق" : "Publish Recipe";
+            }
+
+            localStorage.setItem('cookshare_recipes', JSON.stringify(recipes));
+            document.getElementById('recipeName').value = '';
+            document.getElementById('recipeIngredients').value = '';
+            document.getElementById('recipeSteps').value = '';
+            document.getElementById('recipeImage').value = '';
+            renderRecipes();
+        }
+
+        function editRecipe(index) {
+            document.getElementById('recipeIndex').value = index;
+            document.getElementById('recipeName').value = recipes[index].name;
+            document.getElementById('recipeIngredients').value = recipes[index].ingredients;
+            document.getElementById('recipeSteps').value = recipes[index].steps;
+            document.getElementById('saveBtn').innerText = currentLang === 'ar' ? "تحديث الطبق" : "Update Recipe";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteRecipe(index) {
+            if (confirm(currentLang === 'ar' ? "هل أنت متأكد من حذف هذا الطبق؟" : "Are you sure to delete this recipe?")) {
+                recipes.splice(index, 1);
+                localStorage.setItem('cookshare_recipes', JSON.stringify(recipes));
+                renderRecipes();
+            }
+        }
+
+        function rateRecipe(index, stars) {
+            let r = recipes[index];
+            r.ratingsCount = (r.ratingsCount || 0) + 1;
+            r.rating = ((r.rating || 5) * (r.ratingsCount - 1) + stars) / r.ratingsCount;
+            localStorage.setItem('cookshare_recipes', JSON.stringify(recipes));
+            renderRecipes();
+        }
+
+        function filterRecipes() {
+            const query = document.getElementById('searchInput').value;
+            renderRecipes(query);
+        }
+
+        // إعدادات النافذة واللغة والخطوط
+        function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
+        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+
+        let currentLang = 'ar';
+        function changeLanguage() {
+            currentLang = document.getElementById('langSelect').value;
+            const html = document.getElementById('appHtml');
+            if (currentLang === 'en') {
+                html.setAttribute('dir', 'ltr');
+                html.setAttribute('lang', 'en');
+                document.getElementById('appTitle').innerText = "Community Cooking Platform (CookShare)";
+                document.getElementById('settingsBtnText').innerText = "Settings";
+                document.getElementById('addFormTitle').innerText = "Add Your Recipe";
+                document.getElementById('recipeName').placeholder = "Recipe Name (e.g. Traditional Tamina)";
+                document.getElementById('recipeIngredients').placeholder = "Ingredients (each on a line)";
+                document.getElementById('recipeSteps').placeholder = "Preparation steps & description";
+                document.getElementById('saveBtn').innerText = "Publish Recipe";
+                document.getElementById('recipesListTitle').innerText = "Community Recipes";
+                document.getElementById('searchInput').placeholder = "Search for a recipe to copy...";
+                document.getElementById('settingsTitle').innerText = "App Settings";
+                document.getElementById('langLabel').innerText = "Language:";
+                document.getElementById('fontSizeLabel').innerText = "Font Size:";
+                document.getElementById('shareBtnText').innerText = "Share App with Friends";
+            } else {
+                html.setAttribute('dir', 'rtl');
+                html.setAttribute('lang', 'ar');
+                document.getElementById('appTitle').innerText = "منصة أطباق المجتمع (CookShare)";
+                document.getElementById('settingsBtnText').innerText = "الإعدادات";
+                document.getElementById('addFormTitle').innerText = "أضف طبقك الخاص";
+                document.getElementById('recipeName').placeholder = "اسم الطبق (مثال: طمينة تقليدية)";
+                document.getElementById('recipeIngredients').placeholder = "المقادير (كل مكون في سطر)";
+                document.getElementById('recipeSteps').placeholder = "طريقة التحضير والوصف";
+                document.getElementById('saveBtn').innerText = "نشر الطبق";
+                document.getElementById('recipesListTitle').innerText = "الأطباق المتاحة للمجتمع";
+                document.getElementById('searchInput').placeholder = "ابحث عن طبق يعجبك لتقليده...";
+                document.getElementById('settingsTitle').innerText = "إعدادات التطبيق";
+                document.getElementById('langLabel').innerText = "اللغة / Language:";
+                document.getElementById('fontSizeLabel').innerText = "حجم الخط / Font Size:";
+                document.getElementById('shareBtnText').innerText = "مشاركة التطبيق مع أصدقائك";
+            }
+        }
+
+        function changeFontSize() {
+            const size = document.getElementById('fontSizeSelect').value;
+            document.documentElement.style.setProperty('--font-size', size);
+        }
+
+        function shareApp() {
+            const shareText = "تفضل بزيارة منصة الطبخ الرائعة CookShare لتجربة أشهى الأطباق ووصفاتها! مبرمج التطبيق: BOABCA AZEDDIN";
+            if (navigator.share) {
+                navigator.share({ title: 'CookShare', text: shareText, url: window.location.href });
+            } else {
+                prompt("انسخ رابط المشاركة:", window.location.href + " - برمجة: BOABCA AZEDDIN (azeddinazeddin2005@gmail.com)");
+            }
+        }
+
+        // تشغيل عرض الأطباق عند التحميل
+        renderRecipes();
+    </script>
+</body>
+</html>
